@@ -1,41 +1,45 @@
 import { Injectable } from '@angular/core';
-import { Store, Action } from '@ngrx/store';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { ROUTER_REQUEST } from '@ngrx/router-store';
-import { tap, withLatestFrom, map, mergeMap, filter, exhaustMap, catchError, concatMap, switchMap, delay, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import {
-  ActionTypes,
-  ApiError, getContador,
-} from './global.action';
-import { Observable, of, combineLatest, concat, forkJoin } from 'rxjs';
-import { State } from './global.reducer';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Actions, createEffect, EffectNotification, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { tap, withLatestFrom, map, mergeMap, filter, exhaustMap, catchError, concatMap, switchMap, delay, take, takeUntil } from 'rxjs/operators';
 import { ApiService } from '../services/api.services';
+import { ActionTypes, getContador, putContador, setContador } from './global.action';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
+
 export class GeneralEffects {
   constructor(
     private actions$: Actions,
     private apiService: ApiService,
-    private router: Router,
+    //private router: Router,
     private store$: Store,
   ) { }
 
-  getContador$ = this.actions$.pipe(
-    ofType<getContador>(ActionTypes.getContador),
-    map((action) => {
-      return {}
-    })
-  );
+  getContador$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ActionTypes.getContador),
+      exhaustMap(() => {
+        return this.apiService.get('contadors', {}).pipe(
+          map(response => {
+            console.log('response', response[0].number)
+            return new setContador({ contador:  response[0].number })
+          })
+        );
+      })
+    ), { });
 
-  putContador$ = this.actions$.pipe(
-    ofType<getContador>(ActionTypes.putContador),
-    map((action) => {
-      return {}
-    })
-  );
-
+  putContador$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType<putContador>(ActionTypes.putContador),
+      exhaustMap((action) => {
+        console.log('efect put',action.payload.num)
+        return this.apiService.put('contadors', {id: '6186d8108c2a703b51d64fb4', number: action.payload.num}).pipe(
+          map(() => new getContador())
+        );
+      })
+    ), { });
 }
 
 export const effects = [

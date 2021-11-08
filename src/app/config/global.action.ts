@@ -25,6 +25,7 @@ export class getContador implements Action {
 
 export class putContador implements Action {
     readonly type = ActionTypes.putContador;
+    constructor(public payload: { num: number }) { }
 }
 
 

@@ -9,6 +9,7 @@ import { ActionTypes, actions } from './global.action';
 import { environment } from '../../environments/environment';
 
 
+
 export interface State {
 }
 
@@ -16,11 +17,11 @@ export const reducers: ActionReducerMap<State> = {
 };
 
 export interface GlobalState {
-  setContador: number;
+  contador: number;
 }
 
 export const inicialStateGlobal: GlobalState = {
-  setContador: 0
+  contador: 0
 };
 
 export function globalReducer(state: GlobalState = inicialStateGlobal, action: actions): GlobalState {
@@ -33,7 +34,7 @@ export function globalMetaReducer(reducer: ActionReducer<any>): ActionReducer<an
       case ActionTypes.setContador:
         return {
           ...state,
-          setContador: action.payload.setContador
+          contador: action.payload.contador
         };
       default:
         return reducer(state, action);
@@ -43,4 +44,5 @@ export function globalMetaReducer(reducer: ActionReducer<any>): ActionReducer<an
 }
 
 
-export const metaReducers: MetaReducer<State>[] = !environment.production ? [] : [];
+export const metaReducers: MetaReducer<State>[] = !environment.production ? [globalMetaReducer] : [globalMetaReducer];
+
